@@ -24,8 +24,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter, SimpleSpanProcessor
 
 #XRAY
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
 
 # cloud-watch
 import watchtower
@@ -59,9 +59,9 @@ provider.add_span_processor(processor)
 # xray_recorder.configure(service='backend-flask', dynamic_naming=xray_url)
 
 
-#showing logs in local machine
-simple_processor = SimpleSpanProcessor(ConsoleSpanExporter())
-provider.add_span_processor(simple_processor)
+#showing logs in local machine OTEL
+# simple_processor = SimpleSpanProcessor(ConsoleSpanExporter())
+# provider.add_span_processor(simple_processor)
 
 trace.set_tracer_provider(provider)
 tracer = trace.get_tracer(__name__)
@@ -112,7 +112,7 @@ def rollbar_test():
     rollbar.report_message('Hello World!', 'warning')
     return "Hello World!"
 
-# for watchtower
+# for  cloudwatch (watchtower)
 # @app.after_request
 # def after_request(response):
 #     timestamp = strftime('[%Y-%b-%d %H:%M]')
@@ -155,6 +155,7 @@ def data_create_message():
   return
 
 @app.route("/api/activities/home", methods=['GET'])
+# @xray_recorder.capture('activities_home')
 def data_home():
   data = HomeActivities.run()
   return data, 200
@@ -165,6 +166,7 @@ def data_notifications():
   return data, 200
 
 @app.route("/api/activities/@<string:handle>", methods=['GET'])
+# @xray_recorder.capture('activities_show')
 def data_handle(handle):
   model = UserActivities.run(handle)
   if model['errors'] is not None:
