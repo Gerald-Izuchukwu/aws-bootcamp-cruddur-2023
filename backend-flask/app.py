@@ -153,11 +153,15 @@ def data_create_message():
   else:
     return model['data'], 200
   return
-
+  
+tracer = trace.get_tracer("home.activities")
 @app.route("/api/activities/home", methods=['GET'])
 # @xray_recorder.capture('activities_home')
 def data_home():
-  data = HomeActivities.run()
+  with tracer.start_as_current_span("home-activities-mock-data2"):
+    span = trace.get_current_span()
+    span.set_attribute("app.http.method", request.method)
+    data = HomeActivities.run()
   return data, 200
 
 @app.route("/api/activities/notifications", methods=['GET'])

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 # from aws_xray_sdk.core import xray_recorder
 class UserActivities:
   def run(user_handle):
-    try:
+    # try:
       # segment = xray_recorder.begin_segment('user_activities')
       model = {
         'errors': None,
@@ -34,4 +34,4 @@ class UserActivities:
     # finally:
     #     #close subsegment
     #     xray_recorder.end_subsegment()
-    return model
+      return model
