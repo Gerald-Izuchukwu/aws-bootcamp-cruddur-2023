@@ -13,6 +13,7 @@ from services.messages import *
 from services.create_message import *
 from services.show_activity import *
 from services.notifications_activities import *
+from lib.cognito_jwt_verification import CognitoJwtToken, extract_access_token, TokenVerifyError
 
 #OTEL(HONEYCOMB)
 from opentelemetry import trace
@@ -69,6 +70,12 @@ tracer = trace.get_tracer(__name__)
 app = Flask(__name__)
 # XRayMiddleware(app, xray_recorder)
 
+cognito_jwt_token = CognitoJwtToken(
+  user_pool_id = os.getenv("AWS_COGNITO_USER_POOLS_ID"), 
+  user_pool_client_id = os.getenv('AWS_COGNITO_USER_POOL_CLIENT_ID'), 
+  region = os.getenv('AWS_DEFAULT_REGION'), 
+) 
+
 
 #ROLLBAR
 rollbar_access_token = os.getenv('ROLLBAR_ACCESS_TOKEN')
@@ -94,15 +101,14 @@ def init_rollbar():
 FlaskInstrumentor().instrument_app(app)
 RequestsInstrumentor().instrument()
 
-
 frontend = os.getenv('FRONTEND_URL')
 backend = os.getenv('BACKEND_URL')
 origins = [frontend, backend]
 cors = CORS(
   app, 
   resources={r"/api/*": {"origins": origins}},
-  expose_headers="location,link",
-  allow_headers="content-type,if-modified-since",
+  headers=['Content-Type', 'Authorization'], 
+  expose_headers='Authorization',
   methods="OPTIONS,GET,HEAD,POST"
 )
 
@@ -161,7 +167,18 @@ def data_home():
   with tracer.start_as_current_span("home-activities-mock-data2"):
     span = trace.get_current_span()
     span.set_attribute("app.http.method", request.method)
-    data = HomeActivities.run()
+    app.logger.debug(request.headers)
+    access_token = extract_access_token(request.headers)
+    try:
+        claims = cognito_jwt_token.verify(access_token)
+        app.logger.debug('authenticated')
+        app.logger.debug(claims)
+        app.logger.debug(claims['username'])
+        data = HomeActivities.run(cognito_user_id=claims['username'])
+    except TokenVerifyError as e:
+      app.logger.debug('unauthenticated')
+      app.logger.debug(e)
+      data = HomeActivities.run()
   return data, 200
 
 @app.route("/api/activities/notifications", methods=['GET'])

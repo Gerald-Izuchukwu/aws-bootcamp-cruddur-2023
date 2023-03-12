@@ -20,6 +20,7 @@ export default function SigninPage() {
         console.log('user', user);
         localStorage.setItem("access_token", user.signInUserSession.accessToken.jwtToken)
         window.location.href = "/"
+        // localStorage.removeItem('access-token')
       })
       .catch(error => { if (error.code == 'UserNotConfirmedException') {
         window.location.href = "/confirm"
