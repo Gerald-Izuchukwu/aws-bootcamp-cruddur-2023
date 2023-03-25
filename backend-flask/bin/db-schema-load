@@ -1,1 +1,14 @@
 #! /usr/bin/bash
+
+schema_path=$(realpath .)/backend-flask/db/schema.sql
+echo $schema_path
+
+if [ "$env" = "prod" ];
+then
+    echo "This is the production environment"
+else
+    echo "This is not the production environment"
+fi
+
+echo "db-schema-load"
+psql $CONNECTION_URL cruddur < $schema_path
