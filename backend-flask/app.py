@@ -160,7 +160,7 @@ def data_create_message():
     return model['data'], 200
   return
   
-tracer = trace.get_tracer("home.activities")
+# tracer = trace.get_tracer("home.activities")
 @app.route("/api/activities/home", methods=['GET'])
 # @xray_recorder.capture('activities_home')
 def data_home():

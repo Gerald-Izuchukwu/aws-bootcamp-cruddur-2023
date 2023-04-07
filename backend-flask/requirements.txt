@@ -13,3 +13,8 @@ blinker
 rollbar
 
 python-jose
+
+# Flask-AWSCognito
+
+psycopg[binary]
+psycopg[pool]
