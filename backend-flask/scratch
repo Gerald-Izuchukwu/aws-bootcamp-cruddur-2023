@@ -24,3 +24,12 @@ gp env CONNECTION_URL="postgresql://postgres:password@localhost:5432/cruddur"
 
 export PROD_CONNECTION_URL="postgresql://cruddurroot:gooddbpassword@cruddur-db-instance.csipwdts4fst.us-east-1.rds.amazonaws.com:5432/cruddur"
 gp env PROD_CONNECTION_URL="postgresql://cruddurroot:gooddbpassword@cruddur-db-instance.csipwdts4fst.us-east-1.rds.amazonaws.com:5432/cruddur"
+
+export DB_SG_ID="sg-0c58293200e039d10"
+gp env DB_SG_ID="sg-0c58293200e039d10"
+export DB_SG_RULE_ID="sgr-0ed8022ffbca4b94e"
+gp env DB_SG_RULE_ID="sgr-0ed8022ffbca4b94e"
+
+aws ec2 modify-security-group-rules \
+    --group-id $DB_SG_ID \
+    --security-group-rules "SecurityGroupRuleId=$DB_SG_RULE_ID,SecurityGroupRule={IpProtocol=tcp,FromPort=5432,ToPort=5432,CidrIpv4=$GITPOD_IP/32}"
